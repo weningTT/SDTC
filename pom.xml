@@ -10,6 +10,7 @@
     <module>sdtc-common</module>
     <module>sdtc-runner</module>
     <module>sdtc-biz</module>
+    <module>sdtc-core</module>
   </modules>
   <packaging>pom</packaging>
 
