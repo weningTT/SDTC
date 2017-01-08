@@ -14,15 +14,15 @@ import com.baili.exception.RemotingException;
  */
 public interface EndPoint extends Lifecycle {
 
-    URL getURL();
+    // URL getURL();
 
     InetSocketAddress getLocalAddress();
 
     InetSocketAddress getRemoteAddress();
 
-    ChannleHandler getChannelHandler();
+    // ChannelHandler getChannelHandler();
 
-    void send(Object message) throws RemotingException;
+    // void send(Object message) throws RemotingException;
 
     // void send(Object message, long timeout) throws RemotingException;
 }

@@ -4,7 +4,7 @@
 package com.baili.remoting;
 
 /**
- * Created by ningweiyu on 17/1/4.
+ * Created by ningweiyu on 17/1/5.
  */
-public interface ChannleHandler {
+public interface Channel {
 }
