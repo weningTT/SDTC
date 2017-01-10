@@ -20,11 +20,11 @@ import io.netty.util.ReferenceCountUtil;
 /**
  * Created by ningweiyu on 17/1/4.
  */
-public class NettyTest {
+public class NettyDemoTest {
 
     private int port;
 
-    public NettyTest(int port) {
+    public NettyDemoTest(int port) {
         this.port = port;
     }
 
@@ -64,7 +64,7 @@ public class NettyTest {
         } else {
             port = 8080;
         }
-        new NettyTest(port).run();
+        new NettyDemoTest(port).run();
     }
 }
 

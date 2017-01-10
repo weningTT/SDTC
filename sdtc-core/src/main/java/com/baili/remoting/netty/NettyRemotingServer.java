@@ -5,6 +5,7 @@ package com.baili.remoting.netty;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,9 @@ import com.baili.exception.RemotingException;
 import com.baili.remoting.Channel;
 import com.baili.remoting.RemotingConfig;
 import com.baili.remoting.RemotingServer;
+import com.baili.util.AddressUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -39,22 +40,51 @@ public class NettyRemotingServer implements RemotingServer {
 
     private final DefaultEventExecutorGroup defaultEventExecutorGroup;
 
+    private final InetSocketAddress localAddress;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyRemotingServer.class);
 
     public NettyRemotingServer(){
 
         this.bossSelectorGroup = new NioEventLoopGroup(
-                RemotingConfig.BOSS_SELECTOR_GROUP_THREAD,
-                new NamedThreadFactory("NettyBossGroup"));
+                RemotingConfig.SERVER_BOSS_SELECTOR_GROUP_THREAD,
+                new NamedThreadFactory("NettyServerBossGroup"));
 
         this.workerSelectorGroup = new NioEventLoopGroup(
-                RemotingConfig.WORK_SELECTOR_GROUP_THREAD,
-                new NamedThreadFactory("NettyWorkerGroup"));
+                RemotingConfig.SERVER_WORK_SELECTOR_GROUP_THREAD,
+                new NamedThreadFactory("NettyServerWorkerGroup"));
 
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
-                RemotingConfig.WORKER_THREAD,
-                new NamedThreadFactory("NettyWorkerThread")
+                RemotingConfig.SERVER_WORKER_THREAD,
+                new NamedThreadFactory("NettyServerWorkerThread")
         );
+
+        localAddress = new InetSocketAddress(AddressUtil.getLocalInetAddress(), RemotingConfig.SERVER_PORT);
+
+    }
+
+    @Override
+    public Collection<Channel> getChannels() {
+        return null;
+    }
+
+    @Override
+    public Channel getChannel(InetSocketAddress remoteAddress) {
+        return null;
+    }
+
+    @Override
+    public InetSocketAddress getLocalAddress() {
+        return localAddress;
+    }
+
+    @Override
+    public InetSocketAddress getRemoteAddress() {
+        return null;
+    }
+
+    @Override
+    public void start() {
 
         this.bootstrap.group(this.bossSelectorGroup, this.workerSelectorGroup)
                 .localAddress(getLocalAddress())
@@ -84,38 +114,11 @@ public class NettyRemotingServer implements RemotingServer {
     }
 
     @Override
-    public boolean isBound() {
-        return false;
-    }
-
-    @Override
-    public Collection<Channel> getChannels() {
-        return null;
-    }
-
-    @Override
-    public Channel getChannel(InetSocketAddress remoteAddress) {
-        return null;
-    }
-
-    @Override
-    public InetSocketAddress getLocalAddress() {
-        return null;
-    }
-
-    @Override
-    public InetSocketAddress getRemoteAddress() {
-        return null;
-    }
-
-    @Override
-    public void start() {
-
-    }
-
-    @Override
     public void stop() {
 
+        this.bossSelectorGroup.shutdownGracefully();
+        this.workerSelectorGroup.shutdownGracefully();
+        this.defaultEventExecutorGroup.shutdownGracefully();
     }
 
     @Override

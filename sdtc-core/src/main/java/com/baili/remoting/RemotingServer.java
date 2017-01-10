@@ -16,7 +16,7 @@ public interface RemotingServer extends EndPoint {
      *
      * @return bound
      */
-    boolean isBound();
+    // boolean isBound();
 
     /**
      * get channels.

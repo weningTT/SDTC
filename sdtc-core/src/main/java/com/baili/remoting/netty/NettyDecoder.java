@@ -5,6 +5,9 @@ package com.baili.remoting.netty;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSON;
 import com.baili.remoting.RemotingConfig;
 import com.baili.remoting.protocol.RemotingProtocol;
@@ -20,6 +23,8 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyChannelHandler.class);
+
     public NettyDecoder() {
 
         super(1024 * 1024, 0, 4, 0, 4);
@@ -28,6 +33,7 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
     @Override
     public Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
 
+        LOGGER.info("NettyDecoder");
         ByteBuf frame = (ByteBuf) super.decode(ctx, in);
         if (frame == null) {
             return null;
