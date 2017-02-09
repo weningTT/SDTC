@@ -27,51 +27,58 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 
     public NettyDecoder() {
 
-        super(1024 * 1024, 0, 4, 0, 4);
+        super(1024 * 1024, 0, 4, -4, 4);
     }
 
     @Override
     public Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
 
         LOGGER.info("NettyDecoder");
-        ByteBuf frame = (ByteBuf) super.decode(ctx, in);
-        if (frame == null) {
-            return null;
+        try {
+            ByteBuf frame = (ByteBuf) super.decode(ctx, in);
+            if (frame == null) {
+                return null;
+            }
+
+            byte[] tmpBuf = new byte[frame.capacity()];
+            frame.getBytes(0, tmpBuf);
+            frame.release();
+
+            ByteBuffer byteBuffer = ByteBuffer.wrap(tmpBuf);
+
+            int length = byteBuffer.limit();
+            int sign = byteBuffer.getInt();
+            LOGGER.info("NettyDecoder, length=" + sign);
+            LOGGER.info("NettyDecoder, length=" + sign);
+            // header
+            int headerSize = byteBuffer.getInt();
+            byte[] headerBytes = new byte[headerSize];
+            byteBuffer.get(headerBytes);
+
+            String json = new String(headerBytes, RemotingConfig.DEFAULT_ENCODING);
+            RemotingProtocol protocol = JSON.parseObject(json, RemotingProtocol.class);
+
+            // body
+            int remain = length - 4 - 4 - headerSize;
+            if (remain > 0) {
+
+                int bodySize = byteBuffer.getInt();
+                byte[] bodyBytes = new byte[bodySize];
+                byteBuffer.get(bodyBytes);
+
+                String bodyJson = new String(headerBytes, RemotingConfig.DEFAULT_ENCODING);
+                RemotingProtocolBody protocolBody = JSON.parseObject(bodyJson, RemotingSubmitRequest.class);
+                protocol.setBody(protocolBody);
+            }
+
+            validateSign(protocol, sign);
+            System.out.println(protocol);
+
+            return protocol;
+        }catch (Exception e){
+            LOGGER.error("",e);
         }
-
-        byte[] tmpBuf = new byte[frame.capacity()];
-        frame.getBytes(0, tmpBuf);
-        frame.release();
-
-        ByteBuffer byteBuffer = ByteBuffer.wrap(tmpBuf);
-
-        int length = byteBuffer.limit();
-        int sign = byteBuffer.getInt();
-
-        // header
-        int headerSize = byteBuffer.getInt();
-        byte[] headerBytes = new byte[headerSize];
-        byteBuffer.get(headerBytes);
-
-        String json = new String(headerBytes, RemotingConfig.DEFAULT_ENCODING);
-        RemotingProtocol protocol = JSON.parseObject(json, RemotingProtocol.class);
-
-        // body
-        int remain = length - 4 - 4 - headerSize;
-        if (remain > 0) {
-
-            int bodySize = byteBuffer.getInt();
-            byte[] bodyBytes = new byte[bodySize];
-            byteBuffer.get(bodyBytes);
-
-            String bodyJson = new String(headerBytes, RemotingConfig.DEFAULT_ENCODING);
-            RemotingProtocolBody protocolBody = JSON.parseObject(bodyJson, RemotingSubmitRequest.class);
-            protocol.setBody(protocolBody);
-        }
-
-        validateSign(protocol, sign);
-
-        return protocol;
+        return null;
     }
 
     private void validateSign(RemotingProtocol protocol, int sign){

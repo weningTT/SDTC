@@ -18,12 +18,17 @@ import com.baili.remoting.RemotingServer;
 import com.baili.util.AddressUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
@@ -41,6 +46,8 @@ public class NettyRemotingServer implements RemotingServer {
     private final DefaultEventExecutorGroup defaultEventExecutorGroup;
 
     private final InetSocketAddress localAddress;
+
+    private ChannelFuture channelFuture;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyRemotingServer.class);
 
@@ -96,18 +103,17 @@ public class NettyRemotingServer implements RemotingServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(
-                                defaultEventExecutorGroup,
+                        ch.pipeline().addLast(defaultEventExecutorGroup,
                                 new NettyEncoder(),
                                 new NettyDecoder(),
                                 new IdleStateHandler(0, 0, 60),
-                                new NettyChannelHandler()
-                        );
+                                new NettyConnectManageHandler(),
+                                new NettyChannelHandler());
                     }
                 });
 
         try {
-            this.bootstrap.bind().sync();
+            channelFuture = this.bootstrap.bind().sync();
         } catch (InterruptedException e) {
             throw new RemotingException("the bootstrap fails to bind.", e);
         }
@@ -123,6 +129,63 @@ public class NettyRemotingServer implements RemotingServer {
 
     @Override
     public boolean isRunning() {
-        return false;
+        return channelFuture.channel().isActive();
+    }
+
+    class NettyConnectManageHandler extends ChannelDuplexHandler {
+        @Override
+        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+            LOGGER.info("SERVER : channelRegistered");
+            super.channelRegistered(ctx);
+        }
+
+        @Override
+        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+            LOGGER.info("SERVER : channelUnregistered");
+            super.channelUnregistered(ctx);
+        }
+
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            LOGGER.info("SERVER: channelActive");
+            super.channelActive(ctx);
+
+        }
+
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            LOGGER.info("SERVER: channelInactive");
+            super.channelInactive(ctx);
+
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+
+            LOGGER.error("SERVER: exceptionCaught.", cause);
+
+        }
+
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            if (evt instanceof IdleStateEvent) {
+                IdleStateEvent event = (IdleStateEvent) evt;
+
+                if (event.state().equals(IdleState.READER_IDLE)) {
+                    System.out.println("READER_IDLE");
+                    // 超时关闭channel
+                    ctx.close();
+                } else if (event.state().equals(IdleState.WRITER_IDLE)) {
+                    System.out.println("WRITER_IDLE");
+                } else if (event.state().equals(IdleState.ALL_IDLE)) {
+                    System.out.println("ALL_IDLE");
+                    // 发送心跳
+                    ctx.channel().write("ping\n");
+                }
+            }
+
+            super.userEventTriggered(ctx, evt);
+        }
     }
 }
+

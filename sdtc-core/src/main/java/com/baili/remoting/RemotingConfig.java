@@ -18,6 +18,7 @@ public class RemotingConfig {
     public static final String DEFAULT_ENCODING = "UTF-8";
 
     public static final int SERVER_PORT = 9091;
+    public static final int Client_PORT = 9191;
 
     // CLIENT
     public static final int CLIENT_WORK_SELECTOR_GROUP_THREAD = 2;

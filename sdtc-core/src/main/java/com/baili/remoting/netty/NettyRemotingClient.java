@@ -22,14 +22,19 @@ import com.baili.remoting.protocol.RemotingProtocol;
 import com.baili.util.AddressUtil;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
@@ -67,7 +72,7 @@ public class NettyRemotingClient implements RemotingClient{
                 new NamedThreadFactory("NettyClientWorkerThread")
         );
 
-        localAddress = new InetSocketAddress(AddressUtil.getLocalInetAddress(), RemotingConfig.SERVER_PORT);
+        localAddress = new InetSocketAddress(AddressUtil.getLocalInetAddress(), RemotingConfig.Client_PORT);
 
     }
 
@@ -97,6 +102,7 @@ public class NettyRemotingClient implements RemotingClient{
                                 new NettyEncoder(),
                                 new NettyDecoder(),
                                 new IdleStateHandler(0, 0, 60),
+                                new NettyConnectManageHandler(),
                                 new NettyChannelHandler());
                     }
                 });
@@ -149,6 +155,7 @@ public class NettyRemotingClient implements RemotingClient{
     private Channel getAndCreateChannel(InetSocketAddress socketAddress){
 
         String address = socketAddress.getHostString() + ":" + socketAddress.getPort();
+        LOGGER.info("addr is " + address);
         Channel channel = this.channelMap.get(address);
 
         if (channel != null && channel.isActive()) {
@@ -171,8 +178,9 @@ public class NettyRemotingClient implements RemotingClient{
                 }
 
                 if (needCreate) {
-                    ChannelFuture channelFuture = this.bootstrap.connect(socketAddress);
+                    ChannelFuture channelFuture = this.bootstrap.connect(socketAddress).sync();
                     channel = new NettyChannel(channelFuture);
+                    LOGGER.info("connect success? " + channelFuture.channel().isActive());
                 }
             } catch (Exception e) {
                 LOGGER.error("connect server fail. host=" + socketAddress.getHostName() + ",port=" + socketAddress.getPort());
@@ -183,5 +191,58 @@ public class NettyRemotingClient implements RemotingClient{
         }
 
         return channel;
+    }
+
+    class NettyConnectManageHandler extends ChannelDuplexHandler {
+        @Override
+        public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress,
+                            SocketAddress localAddress, ChannelPromise promise) throws Exception {
+            final String local = localAddress == null ? "UNKNOW" : localAddress.toString();
+            final String remote = remoteAddress == null ? "UNKNOW" : remoteAddress.toString();
+            LOGGER.info("CLIENT : CONNECT  {} => {}", local, remote);
+            super.connect(ctx, remoteAddress, localAddress, promise);
+
+        }
+
+        @Override
+        public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+
+            LOGGER.info("CLIENT : DISCONNECT");
+            super.disconnect(ctx, promise);
+        }
+
+
+        @Override
+        public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+            LOGGER.info("CLIENT : CLOSE");
+            super.close(ctx, promise);
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+
+            LOGGER.error("CLIENT : exceptionCaught exception.", cause);
+        }
+
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            if (evt instanceof IdleStateEvent) {
+                IdleStateEvent event = (IdleStateEvent) evt;
+
+                if (event.state().equals(IdleState.READER_IDLE)) {
+                    System.out.println("READER_IDLE");
+                    // 超时关闭channel
+                    ctx.close();
+                } else if (event.state().equals(IdleState.WRITER_IDLE)) {
+                    System.out.println("WRITER_IDLE");
+                } else if (event.state().equals(IdleState.ALL_IDLE)) {
+                    System.out.println("ALL_IDLE");
+                    // 发送心跳
+                    ctx.channel().write("ping\n");
+                }
+            }
+
+            super.userEventTriggered(ctx, evt);
+        }
     }
 }
