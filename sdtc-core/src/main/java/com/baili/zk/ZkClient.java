@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.zk;
 
 import com.baili.Lifecycle;
 
 /**
- * Created by ningweiyu on 17/1/2.
+ * Created by Wenning on 17/1/2.
  */
 public interface ZkClient extends Lifecycle {
 

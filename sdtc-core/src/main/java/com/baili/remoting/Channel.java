@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.remoting;
 
 import io.netty.channel.ChannelFuture;
 
 /**
- * Created by ningweiyu on 17/1/5.
+ * Created by Wenning on 17/1/5.
  */
 public interface Channel {
 

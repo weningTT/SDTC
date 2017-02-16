@@ -1,7 +1,9 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.remoting.protocol;
+
+import java.io.Serializable;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -16,14 +18,17 @@ import org.apache.commons.lang.builder.ToStringStyle;
  * |<-                                                                                                          ->|
  * </pre>
  *
- * Created by ningweiyu on 17/1/6.
  */
-public class RemotingProtocol {
+public class RemotingProtocol implements Serializable{
+
+    private static final long serialVersionUID = -7275800318233609129L;
 
     private int version = 0;
 
     // the unique index of the request and corresponding response
     private long opaque;
+
+    private String method;
 
     private transient RemotingProtocolBody body;
 
@@ -33,6 +38,14 @@ public class RemotingProtocol {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     public long getOpaque() {

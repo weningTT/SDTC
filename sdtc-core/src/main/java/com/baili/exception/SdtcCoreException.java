@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.exception;
 
 import java.io.Serializable;
 
 /**
- * Created by ningweiyu on 17/1/4.
+ * Created by Wenning on 17/1/4.
  */
 public class SdtcCoreException extends RuntimeException {
 

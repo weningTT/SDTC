@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.registry;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import com.baili.node.Node;
 
 /**
- * Created by ningweiyu on 17/1/2.
+ * Created by Wenning on 17/1/2.
  */
 public interface NotifyListener {
 

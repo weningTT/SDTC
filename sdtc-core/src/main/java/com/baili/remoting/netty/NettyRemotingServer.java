@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.remoting.netty;
 
@@ -33,7 +33,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 /**
- * Created by ningweiyu on 17/1/5.
+ * Created by Wenning on 17/1/5.
  */
 public class NettyRemotingServer implements RemotingServer {
 

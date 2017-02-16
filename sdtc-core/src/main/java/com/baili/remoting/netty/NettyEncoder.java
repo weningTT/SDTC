@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.remoting.netty;
 
@@ -18,7 +18,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
- * Created by ningweiyu on 17/1/6.
+ * Created by Wenning on 17/1/6.
  */
 @ChannelHandler.Sharable
 public class NettyEncoder extends MessageToByteEncoder<RemotingProtocol> {

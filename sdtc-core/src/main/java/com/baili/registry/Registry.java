@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.registry;
 
@@ -9,7 +9,7 @@ import com.baili.node.Node;
  * The registry service used for meta information management of node (client, master, worker).
  * Typically implemented by zookeeper or redis.
  *
- * Created by ningweiyu on 17/1/2.
+ * Created by Wenning on 17/1/2.
  */
 public interface Registry {
 

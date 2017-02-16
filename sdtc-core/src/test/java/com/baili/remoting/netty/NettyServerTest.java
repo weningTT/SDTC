@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.remoting.netty;
 
@@ -11,7 +11,7 @@ import com.baili.remoting.protocol.RemotingProtocol;
 import com.baili.util.AddressUtil;
 
 /**
- * Created by ningweiyu on 17/1/4.
+ * Created by Wenning on 17/1/4.
  */
 public class NettyServerTest {
 

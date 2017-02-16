@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Baidu, Inc. All Rights Reserved.
+ * Copyright (C) 2017 Baili, Inc. All Rights Reserved.
  */
 package com.baili.remoting.netty;
 
@@ -8,7 +8,7 @@ import com.baili.remoting.Channel;
 import io.netty.channel.ChannelFuture;
 
 /**
- * Created by ningweiyu on 17/1/8.
+ * Created by Wenning on 17/1/8.
  */
 public class NettyChannel implements Channel {
 
